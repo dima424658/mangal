@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object p_rgh; }
+dimensions [1 -1 -2 0 0 0 0];
+internalField uniform 101325;
+boundaryField
+{
+ ambient { type totalPressure; p0 uniform 101325; rho rho; psi none; value uniform 101325; }
+ exhaust { type fixedFluxPressure; value uniform 101325; }
+ floor { type fixedFluxPressure; value uniform 101325; }
+ grillWalls { type fixedFluxPressure; value uniform 101325; }
+ heater { type fixedFluxPressure; value uniform 101325; }
+ hoodWalls { type fixedFluxPressure; value uniform 101325; }
+ meatWalls { type fixedFluxPressure; value uniform 101325; }
+ skewerWalls { type fixedFluxPressure; value uniform 101325; }
+}

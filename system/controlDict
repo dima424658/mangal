@@ -1,0 +1,101 @@
+FoamFile
+{ version 2.0; format ascii; class dictionary; object controlDict; }
+application buoyantSimpleFoam;
+startFrom startTime;
+startTime 0;
+stopAt endTime;
+endTime 100;
+deltaT 1;
+writeControl timeStep;
+writeInterval 25;
+purgeWrite 3;
+writeFormat ascii;
+writePrecision 10;
+runTimeModifiable true;
+functions
+{
+ outletThermalFlux
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name exhaust; operation weightedSum;
+  weightField phi; fields (T); writeFields false;
+ }
+ ambientThermalFlux
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name ambient; operation weightedSum;
+  weightField phi; fields (T); writeFields false;
+ }
+ flowSections
+ {
+  type surfaces; libs (sampling);
+  writeControl timeStep; writeInterval 25;
+  surfaceFormat vtk; interpolationScheme cellPoint;
+  fields (U T p);
+  surfaces
+  {
+   frontSection
+   {
+    type cuttingPlane; planeType pointAndNormal;
+    pointAndNormalDict { point (0 -0.05 0); normal (0 1 0); }
+    interpolate true;
+   }
+   sideSection
+   {
+    type cuttingPlane; planeType pointAndNormal;
+    pointAndNormalDict { point (-0.275 0 0); normal (1 0 0); }
+    interpolate true;
+   }
+  }
+ }
+ holeProbes
+ {
+  type probes; libs (sampling);
+  writeControl timeStep; writeInterval 1;
+  fields (U T); interpolationScheme cell;
+  probeLocations ((-0.53 -0.247 0.08) (-0.36 -0.247 0.08) (-0.19 -0.247 0.08) (-0.02 -0.247 0.08) (-0.53 0.147 0.08) (-0.36 0.147 0.08) (-0.19 0.147 0.08) (-0.02 0.147 0.08));
+ }
+ outletVolumeFlow
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name exhaust; operation areaNormalIntegrate; fields (U); writeFields false;
+ }
+ heatFlux
+ {
+  type wallHeatFlux; libs (fieldFunctionObjects); patches (heater);
+  executeControl timeStep; executeInterval 1;
+  writeControl timeStep; writeInterval 25;
+ }
+ heaterPower
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name heater; operation areaIntegrate; fields (wallHeatFlux); writeFields false;
+ }
+ ambientMassFlow
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name ambient; operation sum; fields (phi); writeFields false;
+ }
+ outletMassFlow
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name exhaust; operation sum; fields (phi); writeFields false;
+ }
+ outletState
+ {
+  type surfaceFieldValue; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 1;
+  regionType patch; name exhaust; operation areaAverage; fields (T p U); writeFields false;
+ }
+ temperatureRange
+ {
+  type fieldMinMax; libs (fieldFunctionObjects);
+  writeControl timeStep; writeInterval 10; fields (T U); mode magnitude; location true;
+ }
+}

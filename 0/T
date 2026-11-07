@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object T; }
+dimensions [0 0 0 1 0 0 0];
+internalField uniform 293.15;
+boundaryField
+{
+ ambient { type inletOutlet; inletValue uniform 293.15; value uniform 293.15; }
+ exhaust { type zeroGradient; }
+ heater { type externalWallHeatFluxTemperature; mode power; Q constant 4000; kappaMethod fluidThermo; value uniform 293.15; }
+ meatWalls { type zeroGradient; }
+ skewerWalls { type zeroGradient; }
+ floor { type zeroGradient; }
+ grillWalls { type zeroGradient; }
+ hoodWalls { type zeroGradient; }
+}

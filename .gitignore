@@ -1,0 +1,34 @@
+# Local environment and caches
+.venv/
+__pycache__/
+.ruff_cache/
+*.py[cod]
+.DS_Store
+.case.lock
+.decomposition.json
+
+# OpenFOAM generated mesh, parallel partitions and results
+/constant/polyMesh/
+/constant/triSurface/
+/logs/
+/postProcessing/
+/[1-9]*/
+/0.[0-9]*/
+processor[0-9]*/
+processors[0-9]*/
+*.foam
+/runs/
+/validation/
+
+# Generated geometry metadata and Blender exports
+/geometry/generated.json
+/geometry/MESH_REBUILD_REQUIRED
+/preview/
+
+# Generated VTK, HTML and preview bundles; keep viewer documentation
+/visualization/*/*
+!/visualization/*/README.md
+
+# Reproducible distribution archives
+/mangal-*-source.zip
+/visualization/**/*.zip

@@ -1,0 +1,11 @@
+FoamFile
+{ version 2.0; format ascii; class dictionary; object topoSetDict; }
+actions
+(
+ { name exhaustFaces; type faceSet; action new; source patchToFace; sourceInfo { patches (top exhaust); } }
+ { name exhaustFaces; type faceSet; action subset; source cylinderToFace;
+    sourceInfo { point1 (0 0 3.459999); point2 (0 0 3.460001); radius 0.1; } }
+ { name ambientFaces; type faceSet; action new; source patchToFace; sourceInfo { patch ambient; } }
+ { name ambientFaces; type faceSet; action add; source patchToFace; sourceInfo { patches (top exhaust); } }
+ { name ambientFaces; type faceSet; action subtract; source faceToFace; sourceInfo { set exhaustFaces; } }
+);

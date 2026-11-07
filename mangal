@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eo pipefail
+cd "$(dirname "$0")"
+needs_foam=true
+case "${1:-}" in ''|-h|--help|preview|status) needs_foam=false ;; esac
+for arg in "$@"; do
+    case "$arg" in --dry-run|-h|--help) needs_foam=false ;; esac
+done
+if "$needs_foam"; then
+    echo 'Loading OpenFOAM environment...'
+    source scripts/foam-env.sh
+fi
+exec python3 -u scripts/workflow.py "$@"

@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object omega; }
+dimensions [0 0 -1 0 0 0 0];
+internalField uniform 10;
+boundaryField
+{
+ floor { type omegaWallFunction; value uniform 10; }
+ heater { type omegaWallFunction; value uniform 10; }
+ grillWalls { type omegaWallFunction; value uniform 10; }
+ hoodWalls { type omegaWallFunction; value uniform 10; }
+ ambient { type inletOutlet; inletValue uniform 10; value uniform 10; }
+ exhaust { type inletOutlet; inletValue uniform 10; value uniform 10; }
+ meatWalls { type omegaWallFunction; value uniform 10; }
+ skewerWalls { type omegaWallFunction; value uniform 10; }
+}

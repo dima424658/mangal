@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object k; }
+dimensions [0 2 -2 0 0 0 0];
+internalField uniform 0.01;
+boundaryField
+{
+ floor { type kqRWallFunction; value uniform 0.01; }
+ heater { type kqRWallFunction; value uniform 0.01; }
+ grillWalls { type kqRWallFunction; value uniform 0.01; }
+ hoodWalls { type kqRWallFunction; value uniform 0.01; }
+ ambient { type inletOutlet; inletValue uniform 0.01; value uniform 0.01; }
+ exhaust { type inletOutlet; inletValue uniform 0.01; value uniform 0.01; }
+ meatWalls { type kqRWallFunction; value uniform 0.01; }
+ skewerWalls { type kqRWallFunction; value uniform 0.01; }
+}

@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object p; }
+dimensions [1 -1 -2 0 0 0 0];
+internalField uniform 101325;
+boundaryField
+{
+ ambient { type calculated; value uniform 101325; }
+ exhaust { type calculated; value uniform 101325; }
+ floor { type calculated; value uniform 101325; }
+ grillWalls { type calculated; value uniform 101325; }
+ heater { type calculated; value uniform 101325; }
+ hoodWalls { type calculated; value uniform 101325; }
+ meatWalls { type calculated; value uniform 101325; }
+ skewerWalls { type calculated; value uniform 101325; }
+}

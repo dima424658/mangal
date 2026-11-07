@@ -1,0 +1,106 @@
+{
+  "units": "m",
+  "grill": {
+    "width": 0.85,
+    "depth": 0.4,
+    "height": 0.16,
+    "front_holes": 4,
+    "back_holes": 4,
+    "hole_diameter": 0.02,
+    "hole_center_z_assumed": 0.08,
+    "hole_centers_x_assumed": [
+      -0.255,
+      -0.085,
+      0.085,
+      0.255
+    ],
+    "offset_x_m": -0.275,
+    "alignment": "left edge flush with hood inner left wall, viewed from front (negative Y)",
+    "offset_y_m": -0.05,
+    "rear_clearance_m": 0.1,
+    "left_clearance_m": 0.0
+  },
+  "hood": {
+    "inlet_width": 1.4,
+    "inlet_depth": 0.5,
+    "bottom_z": 0.66,
+    "top_width": 0.3,
+    "top_depth": 0.3,
+    "top_z": 1.16,
+    "enclosure": {
+      "left": true,
+      "right": true,
+      "back": true,
+      "front": false,
+      "bottom_z_m": 0.0,
+      "back_direction": "+Y"
+    }
+  },
+  "duct": {
+    "first_diameter": 0.25,
+    "first_length": 0.2,
+    "second_diameter": 0.2,
+    "second_length": 2.0,
+    "square_to_round_transition": "loft, square 300 mm to round 250 mm over 50 mm",
+    "reducer_length": 0.05
+  },
+  "environment": {
+    "air_temperature_K": 293.15,
+    "domain_bounds_m": [
+      -2,
+      2,
+      -2,
+      2,
+      0,
+      3.46
+    ],
+    "wind_m_s": 0
+  },
+  "physics": {
+    "heat_to_air_W": 4000,
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "recommended_solver": "buoyantSimpleFoam",
+    "turbulence_model": "kOmegaSST",
+    "openfoam_version": "v2606",
+    "exhaust_cfm": 206.0022225420168
+  },
+  "assumptions": {
+    "wall_thickness_m": 0.006,
+    "square_to_round_length_m": 0.05,
+    "reducer_length_m": 0.05,
+    "heat_surface": "4 kW prescribed convective heat into air immediately above a porous charcoal bed; grill bottom adiabatic",
+    "domain_top": "duct outlet; other top faces open",
+    "notes": "Dimensions refer to inner hood/duct and outer grill. Hole positions assumed."
+  },
+  "fan": {
+    "placement": "duct_outlet",
+    "visual_representation": "symbolic disk at outlet, casing dimensions unspecified",
+    "flow_cfm": 206.0022225420168
+  },
+  "charcoal": {
+    "enabled": true,
+    "bed_thickness_m": 0.05,
+    "particle_diameter_m": 0.03,
+    "void_fraction": 0.45,
+    "heat_to_air_W": 4000,
+    "startup_ramp_iterations": 40,
+    "model": "porous charcoal resistance; prescribed convective heat in air above bed; no chemistry or solid thermal inertia",
+    "heat_release_layer_m": 0.03
+  },
+  "skewers": {
+    "enabled": true,
+    "count": 10,
+    "pieces_per_skewer": 6,
+    "rod_diameter_m": 0.006,
+    "meat_piece_diameter_m": 0.045,
+    "thermal_model": "adiabatic flow obstacles"
+  },
+  "mesh": {
+    "hole_level": 6,
+    "bed_level": 4
+  }
+}

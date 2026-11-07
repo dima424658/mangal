@@ -1,0 +1,15 @@
+FoamFile
+{ version 2.0; format ascii; class volScalarField; object nut; }
+dimensions [0 2 -1 0 0 0 0];
+internalField uniform 0;
+boundaryField
+{
+ floor { type nutkWallFunction; value uniform 0; }
+ heater { type nutkWallFunction; value uniform 0; }
+ grillWalls { type nutkWallFunction; value uniform 0; }
+ hoodWalls { type nutkWallFunction; value uniform 0; }
+ ambient { type calculated; value uniform 0; }
+ exhaust { type calculated; value uniform 0; }
+ meatWalls { type nutkWallFunction; value uniform 0; }
+ skewerWalls { type nutkWallFunction; value uniform 0; }
+}

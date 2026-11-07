@@ -1,0 +1,46 @@
+FoamFile
+{ version 2.0; format ascii; class dictionary; object snappyHexMeshDict; }
+ castellatedMesh true;
+snap true;
+addLayers false;
+geometry
+{
+ grill.stl { type triSurfaceMesh; name grill; regions { grillWalls { name grillWalls; } heater { name heater; } } }
+ skewers.stl { type triSurfaceMesh; name skewers; regions { meatWalls { name meatWalls; } skewerWalls { name skewerWalls; } } }
+ hood.stl { type triSurfaceMesh; name hood; regions { hoodWalls { name hoodWalls; } } }
+ plume { type searchableBox; min (-0.7749999999999999 -0.325 0.02); max (0.22499999999999998 0.22500000000000003 1.2); }
+ duct { type searchableBox; min (-0.18 -0.18 1.15); max (0.18 0.18 3.46); }
+ bed { type searchableBox; min (-0.7 -0.25 0.005); max (0.14999999999999997 0.15000000000000002 0.10); }
+ hole_0_0 { type searchableBox; min (-0.544 -0.262 0.066); max (-0.516 -0.238 0.094); } hole_0_1 { type searchableBox; min (-0.37400000000000005 -0.262 0.066); max (-0.34600000000000003 -0.238 0.094); } hole_0_2 { type searchableBox; min (-0.20400000000000001 -0.262 0.066); max (-0.176 -0.238 0.094); } hole_0_3 { type searchableBox; min (-0.034000000000000016 -0.262 0.066); max (-0.0060000000000000175 -0.238 0.094); } hole_2_0 { type searchableBox; min (-0.544 0.138 0.066); max (-0.516 0.16200000000000003 0.094); } hole_2_1 { type searchableBox; min (-0.37400000000000005 0.138 0.066); max (-0.34600000000000003 0.16200000000000003 0.094); } hole_2_2 { type searchableBox; min (-0.20400000000000001 0.138 0.066); max (-0.176 0.16200000000000003 0.094); } hole_2_3 { type searchableBox; min (-0.034000000000000016 0.138 0.066); max (-0.0060000000000000175 0.16200000000000003 0.094); }
+}
+castellatedMeshControls
+{
+ maxLocalCells 4000000; maxGlobalCells 8000000; minRefinementCells 0;
+ nCellsBetweenLevels 3;
+ features ();
+ refinementSurfaces
+ {
+   skewers { level (5 5); patchInfo { type wall; } }
+   grill { level (4 4); patchInfo { type wall; } }
+   hood { level (4 4); patchInfo { type wall; } }
+ }
+ resolveFeatureAngle 30;
+ refinementRegions
+ { bed { mode inside; levels ((1e15 4)); } plume { mode inside; levels ((1e15 2)); } duct { mode inside; levels ((1e15 3)); } hole_0_0 { mode inside; levels ((1e15 6)); } hole_0_1 { mode inside; levels ((1e15 6)); } hole_0_2 { mode inside; levels ((1e15 6)); } hole_0_3 { mode inside; levels ((1e15 6)); } hole_2_0 { mode inside; levels ((1e15 6)); } hole_2_1 { mode inside; levels ((1e15 6)); } hole_2_2 { mode inside; levels ((1e15 6)); } hole_2_3 { mode inside; levels ((1e15 6)); } }
+ locationInMesh (1 1 0.5);
+ allowFreeStandingZoneFaces true;
+}
+snapControls
+{ nSmoothPatch 3; tolerance 1.5; nSolveIter 50; nRelaxIter 8; nFeatureSnapIter 15;
+ implicitFeatureSnap true; explicitFeatureSnap false; multiRegionFeatureSnap true; }
+addLayersControls
+{ relativeSizes true; layers {} expansionRatio 1.2; finalLayerThickness 0.3; minThickness 0.1;
+ nGrow 0; featureAngle 60; nRelaxIter 3; nSmoothSurfaceNormals 1; nSmoothNormals 3; nSmoothThickness 10;
+ maxFaceThicknessRatio 0.5; maxThicknessToMedialRatio 0.3; minMedialAxisAngle 90;
+ nBufferCellsNoExtrude 0; nLayerIter 50; }
+meshQualityControls
+{
+ #includeEtc "caseDicts/meshQualityDict"
+ nSmoothScale 4; errorReduction 0.75;
+}
+mergeTolerance 1e-6;
