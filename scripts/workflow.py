@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import re
 import shlex
 import signal
 import subprocess
@@ -20,6 +21,7 @@ def parser():
     )
     sub = p.add_subparsers(dest="action", required=True)
     for name, help_text in [
+        ("compare", "Сравнить зазоры 50/35 см и расходы 350/600 м³/ч"),
         ("all", "Расчёт → OBJ preview → отверстия → visualization"),
         ("mesh", "Построить и проверить сетку"),
         ("run", "Новый расчёт"),
@@ -35,7 +37,7 @@ def parser():
         s.add_argument(
             "--dry-run", action="store_true", help="Показать команды без запуска и изменения файлов"
         )
-        if name in ("all", "mesh", "run", "resume", "visualize", "audit", "check"):
+        if name in ("all", "mesh", "run", "resume", "visualize", "audit", "check", "compare"):
             s.add_argument(
                 "--parallel",
                 nargs="?",
@@ -121,6 +123,7 @@ def plan(args):
         "check": [[PYTHON, "scripts/run_case.py", "check", *mpi]],
         "report": [[PYTHON, "scripts/charcoal_report.py"]],
         "status": [],
+        "compare": [[PYTHON, "scripts/comparison.py", *mpi]],
     }[action]
 
 
@@ -142,6 +145,29 @@ def status():
         print(f"{name}: saved fields {root_time}")
         if distributed:
             print("  MPI checkpoints:", json.dumps(distributed))
+    experiment = ROOT / "runs/comparisons/hood-gap-fan"
+    if experiment.exists():
+        print("Comparison:")
+        from comparison import VARIANTS
+
+        for name, gap, flow in VARIANTS:
+            folder = experiment / name
+            marker = folder / "comparison.json"
+            if not marker.exists():
+                print(f"  {name}: {gap * 100:g} cm / {flow:g} м³/ч; queued")
+                continue
+            settings = json.loads(marker.read_text())
+            label = "complete" if (folder / "COMPLETED.json").exists() else "pending / incomplete"
+            log = folder / "runs/charcoal/logs/buoyantSimpleFoam.log"
+            times = (
+                re.findall(r"^Time = ([0-9.]+)$", log.read_text(errors="replace"), re.M)
+                if log.exists()
+                else []
+            )
+            progress = f"; last solver iteration {times[-1]}" if times else ""
+            print(
+                f"  {folder.name}: {settings['gap_m'] * 100:g} cm / {settings['flow_m3_h']:g} м³/ч; {label}{progress}"
+            )
     print("Geometry OBJ: preview/mangal.obj")
     print(
         "Heated views: visualization/charcoal/charcoal-flow.html, charcoal-flow.obj, charcoal-view.vtm"

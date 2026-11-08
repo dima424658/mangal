@@ -200,6 +200,8 @@ def decompose(stage, case, count, selection="latest", fields=True):
 def reconstruct(stage, case, selection="latest", fields=None):
     args = ["reconstructPar", "-case", str(case)]
     args += ["-latestTime"] if selection == "latest" else ["-time", str(selection)]
+    if str(selection) == "0":
+        args += ["-withZero"]
     if fields:
         args += ["-fields", "(" + " ".join(fields) + ")"]
     stage("Reconstruct fields", args, case / "logs/reconstructPar.log")

@@ -7,9 +7,9 @@ import shutil
 
 from cold_obj import export_obj
 from cold_viewer import main as viewer
-from model_parameters import fan_cfm, mesh_signature
+from model_parameters import fan_m3_h, mesh_signature
 from parallel import configure, preflight, tool
-from run_case import ROOT, case_lock, stage
+from run_case import ROOT, case_lock, solver_finished, stage
 
 
 def main():
@@ -26,15 +26,15 @@ def main():
     if not (case / "logs/simpleFoam.log").exists():
         raise SystemExit("Run ./mangal run --cold before generating cold-flow views.")
     log = (case / "logs/simpleFoam.log").read_text()
-    if not log.rstrip().endswith("End") or "FOAM FATAL" in log:
+    if not solver_finished(log) or "FOAM FATAL" in log:
         raise SystemExit(
             "Cold solver did not finish normally; inspect validation/isothermal/logs/simpleFoam.log"
         )
     p = json.loads((ROOT / "geometry/parameters.json").read_text())
     saved = json.loads((case / "geometry/parameters.json").read_text())
-    if mesh_signature(p) != mesh_signature(saved) or abs(fan_cfm(p) - fan_cfm(saved)) > 1e-8:
+    if mesh_signature(p) != mesh_signature(saved) or abs(fan_m3_h(p) - fan_m3_h(saved)) > 1e-8:
         raise SystemExit(
-            "Cold result belongs to another geometry or CFM value. Run ./mangal run --cold again."
+            "Cold result belongs to another geometry or м³/ч value. Run ./mangal run --cold again."
         )
     with case_lock():
         preflight(stage, case)

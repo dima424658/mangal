@@ -73,6 +73,12 @@ class ParallelTests(unittest.TestCase):
             self.assertEqual(json.loads((case / ".decomposition.json").read_text())["time"], "200")
             self.assertTrue(normalize.called)
 
+    def test_initial_fields_are_explicitly_included_in_reconstruction(self):
+        calls = []
+        parallel.reconstruct(lambda *a, **k: calls.append(a), Path("/private/tmp"), "0", ["Cz"])
+        self.assertIn("-withZero", calls[0][1])
+        self.assertIn("0", calls[0][1])
+
     def test_serial_does_not_decompose(self):
         calls = []
         with patch.dict(os.environ, {"MANGAL_PARALLEL": "1"}):

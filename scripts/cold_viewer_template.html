@@ -1,8 +1,8 @@
 <!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Холодный проход мангала · __FLOW_CFM__ CFM</title>
+<title>Холодный проход мангала · __FLOW_M3_H__ м³/ч</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101822;color:#edf3fa;font:14px system-ui,sans-serif}#view{position:fixed;inset:0}aside{position:fixed;left:18px;top:18px;width:315px;background:#142131ed;padding:20px;border:1px solid #40556b;border-radius:12px;max-height:92vh;overflow:auto;z-index:2}h1{font-size:20px;line-height:1.3;margin:0 0 10px}p{line-height:1.5;color:#c1cedb}label{display:block;margin:12px 0}input[type=range]{width:100%}button{background:#26445c;color:white;border:1px solid #6285a2;border-radius:5px;padding:8px;margin:3px;cursor:pointer}small{color:#c1cedb;line-height:1.5;display:block}.badge{color:#ffc779;font-size:12px}.bar{height:12px;background:linear-gradient(90deg,#164db3,#10bfd1,#55ce74,#efc63e,#f04a2e);margin:9px 0 3px}.ends{display:flex;justify-content:space-between}#status{border-top:1px solid #40556b;padding-top:12px;color:#b4d9ef}a{color:#9cd6ff}
-</style><div id="view"></div><aside><h1>Холодный проход<br>__FLOW_CFM__ CFM</h1><div class="badge">__ITERATION__ итераций · предварительное поле · без нагрева</div>
+</style><div id="view"></div><aside><h1>Холодный проход<br>__FLOW_M3_H__ м³/ч</h1><div class="badge">__ITERATION__ итераций · предварительное поле · без нагрева</div>
 <p>Цвет показывает модуль скорости. Линии тока рассчитаны OpenFOAM по полю U; это не дымовой и не тепловой расчёт.</p>
 <label><input id="intake" type="checkbox" checked> Линии перед мангалом</label>
 <label><input id="grillFlow" type="checkbox" checked> Линии над чашей</label>
@@ -46,7 +46,7 @@ document.getElementById('all').onclick=()=>camera([4,-7,3.5],[0,0,1.65],1.95);
 document.getElementById('face').onclick=()=>camera([0,-6,.7],[0,0,.7],1.05);
 document.getElementById('profile').onclick=()=>camera([5,0,.7],[0,0,.7],1.05);
 setScale(.6);camera([3,-5,2.5],[-.12,0,.65],1.05);
-document.getElementById('status').textContent='Поле U: итерация __ITERATION__. Данные OpenFOAM загружены. Скорости — м/с, расход — CFM.';
+document.getElementById('status').textContent='Поле U: итерация __ITERATION__. Данные OpenFOAM загружены. Скорости — м/с, расход — м³/ч.';
 }catch(error){document.getElementById('status').textContent='Ошибка 3D: '+error.message+'. Можно открыть VTK-файлы в ParaView.';console.error(error);}
 })();
 </script></html>

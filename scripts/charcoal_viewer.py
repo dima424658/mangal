@@ -11,7 +11,7 @@ from charcoal import lumps
 from cold_obj import export_obj
 from cold_viewer import add_skewers, read_vtp, solid, write_geometry_vtp
 from generate import grill, hood
-from model_parameters import fan_cfm
+from model_parameters import fan_m3_h
 from run_case import ROOT
 
 
@@ -108,7 +108,7 @@ def build():
                 d[key] = [float(f"{v:.7g}") for v in d[key]]
     text = (ROOT / "scripts/charcoal_viewer_template.html").read_text()
     replacements = {
-        "__FLOW_CFM__": f"{fan_cfm(p):.3f}",
+        "__FLOW_M3_H__": f"{fan_m3_h(p):.3f}",
         "__ITERATION__": latest,
         "__POWER__": f"{summary['source_power_W']:.0f}",
         "__DATA_JSON__": json.dumps(data, separators=(",", ":"), allow_nan=False),

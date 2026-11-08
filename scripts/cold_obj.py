@@ -9,7 +9,7 @@ from pathlib import Path
 from charcoal import lumps
 from cold_viewer import ROOT, read_vtp, solid
 from generate import grill, hood
-from model_parameters import fan_cfm
+from model_parameters import fan_m3_h
 
 COLORS = [
     (0.086, 0.302, 0.70),
@@ -61,7 +61,7 @@ def export_obj(
     faces = 0
     with (out / (basename + ".obj")).open("w") as f:
         f.write(
-            f"# OpenFOAM streamlines. Metres. {fan_cfm(p):.6f} CFM.\n# Colour field {scalar}; range {color_range}; values above range saturate red.\nmtllib {basename}.mtl\n"
+            f"# OpenFOAM streamlines. Metres. {fan_m3_h(p):.6f} м³/ч.\n# Colour field {scalar}; range {color_range}; values above range saturate red.\nmtllib {basename}.mtl\n"
         )
 
         def vertex(pt):

@@ -66,7 +66,7 @@
     "recommended_solver": "buoyantSimpleFoam",
     "turbulence_model": "kOmegaSST",
     "openfoam_version": "v2606",
-    "exhaust_cfm": 206.0022225420168
+    "exhaust_m3_h": 350.0
   },
   "assumptions": {
     "wall_thickness_m": 0.006,
@@ -79,7 +79,7 @@
   "fan": {
     "placement": "duct_outlet",
     "visual_representation": "symbolic disk at outlet, casing dimensions unspecified",
-    "flow_cfm": 206.0022225420168
+    "flow_m3_h": 350.0
   },
   "charcoal": {
     "enabled": true,

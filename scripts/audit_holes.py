@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 from generate import header
-from model_parameters import CFM_TO_M3_S
+from model_parameters import M3_H_TO_M3_S
 from parallel import configure, preflight, tool
 from run_case import ROOT, case_lock, stage
 
@@ -84,8 +84,9 @@ sampledSurfaceDict {{ {cut} }} }}""")
                 **item,
                 "status": "sampled" if a > 0 else "closed or unresolved",
                 "area_m2": a,
+                "iteration": values[0] if values else None,
                 "area_fraction_of_nominal": a / (math.pi * r * r),
-                "flow_cfm_positive_into_grill": values[-1] / CFM_TO_M3_S
+                "flow_m3_h_positive_into_grill": values[-1] / M3_H_TO_M3_S
                 if len(values) > 1
                 else None,
             }
@@ -93,6 +94,21 @@ sampledSurfaceDict {{ {cut} }} }}""")
     output = case / "results"
     output.mkdir(exist_ok=True)
     (output / "holes.json").write_text(json.dumps(result, indent=2) + "\n")
+    lines = [
+        "# Потоки через отверстия",
+        "",
+        "Плюс — внутрь чаши. Расходы в м³/ч.",
+        "",
+        "| Отверстие | Итерация | Площадь, мм² | Расход, м³/ч |",
+        "|---|---:|---:|---:|",
+    ]
+    for row in result:
+        flow = row.get("flow_m3_h_positive_into_grill")
+        value = f"{flow:.4f}" if flow is not None else "нет данных"
+        lines.append(
+            f"| {row['hole']} | {row.get('iteration')} | {row['area_m2'] * 1e6:.2f} | {value} |"
+        )
+    (output / "HOLES.md").write_text("\n".join(lines) + "\n")
     for row in result:
         print(
             row["hole"],
@@ -100,8 +116,8 @@ sampledSurfaceDict {{ {cut} }} }}""")
             "area",
             row["area_m2"],
             "m2; Q",
-            row.get("flow_cfm_positive_into_grill"),
-            "CFM",
+            row.get("flow_m3_h_positive_into_grill"),
+            "м³/ч",
             flush=True,
         )
     return result

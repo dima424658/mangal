@@ -1,7 +1,7 @@
 <!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Угли · __POWER__ Вт · __FLOW_CFM__ CFM</title>
+<title>Угли · __POWER__ Вт · __FLOW_M3_H__ м³/ч</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#101822;color:#edf3fa;font:14px system-ui,sans-serif}#view{position:fixed;inset:0}aside{position:fixed;left:18px;top:18px;width:325px;background:#142131ef;padding:20px;border:1px solid #40556b;border-radius:12px;max-height:92vh;overflow:auto;z-index:2}h1{font-size:20px;line-height:1.3;margin:0 0 10px}p{line-height:1.45;color:#c1cedb}label{display:block;margin:10px 0}input[type=range]{width:100%}button,select{background:#26445c;color:white;border:1px solid #6285a2;border-radius:5px;padding:7px;margin:3px;cursor:pointer}small{color:#c1cedb;line-height:1.5;display:block}.badge{color:#ffc779;font-size:12px}.bar{height:12px;background:linear-gradient(90deg,#164db3,#10bfd1,#55ce74,#efc63e,#f04a2e);margin:9px 0 3px}.ends{display:flex;justify-content:space-between}#status{border-top:1px solid #40556b;padding-top:12px;color:#b4d9ef}a{color:#9cd6ff}</style>
-<div id="view"></div><aside><h1>Угли: __POWER__ Вт<br>__FLOW_CFM__ CFM</h1><div class="badge">Итерация __ITERATION__ · предварительное поле</div>
+<div id="view"></div><aside><h1>Угли: __POWER__ Вт<br>__FLOW_M3_H__ м³/ч</h1><div class="badge">Итерация __ITERATION__ · предварительное поле</div>
 <p>Цвет — температура газовой фазы или скорость. Чёрные куски иллюстрируют пористый слой; температура твёрдых углей не рассчитывалась.</p>
 <label>Поле <select id="mode"><option value="temperature_C">Температура, °C</option><option value="speed">Скорость, м/с</option></select></label>
 <label><input id="coal" type="checkbox" checked> Куски угля</label><label><input id="intake" type="checkbox" checked> Вход вытяжки (72 линии)</label><label><input id="grillFlow" type="checkbox" checked> Мангал и шампуры (80 линий)</label>

@@ -7,7 +7,7 @@ import math
 import re
 from pathlib import Path
 
-from model_parameters import CFM_TO_M3_S, fan_cfm, fan_m3_s
+from model_parameters import M3_H_TO_M3_S, fan_m3_h, fan_m3_s
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,7 +35,7 @@ def main():
     args = parser.parse_args()
     ROOT = args.case.resolve()
     p = json.loads((ROOT / "geometry/parameters.json").read_text())
-    require(fan_cfm(p) > 0, "Expected positive exhaust flow")
+    require(fan_m3_h(p) > 0, "Expected positive exhaust flow")
     target_q = fan_m3_s(p)
     require(p["physics"]["heat_to_air_W"] == 4000, "Expected 4000 W")
     require(p["environment"]["wind_m_s"] == 0, "Wind BC is implemented for still ambient air only")
@@ -113,7 +113,7 @@ def main():
         heat = latest_data("heaterPower")[1]
         require(math.isclose(q, target_q, rel_tol=1e-5), f"Outlet Q={q} m3/s")
         require(math.isclose(abs(heat), 4000, rel_tol=1e-3), f"Heater integral={heat} W")
-        print(f"Outlet: {q / CFM_TO_M3_S:.6f} CFM; area: {area:.8f} m2; wall heat: {heat:.6f} W")
+        print(f"Outlet: {q / M3_H_TO_M3_S:.6f} м³/ч; area: {area:.8f} m2; wall heat: {heat:.6f} W")
         mass_out = latest_data("outletMassFlow")[1]
         mass_in = latest_data("ambientMassFlow")[1]
         print(f"Mass imbalance / outlet: {abs(mass_out + mass_in) / max(abs(mass_out), 1e-30):.4%}")

@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 
-from model_parameters import CFM_TO_M3_S, fan_cfm
+from model_parameters import M3_H_TO_M3_S, fan_m3_h
 
 ROOT = Path(__file__).resolve().parents[1]
 NUM = r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?"
@@ -41,7 +41,7 @@ def main():
     mass_out = latest_row("outletMassFlow")
     state = latest_row("outletState")
     if q:
-        report["exhaust_cfm"] = q[1] / CFM_TO_M3_S
+        report["exhaust_m3_h"] = q[1] / M3_H_TO_M3_S
     if heat:
         report["heater_W"] = heat[1]
     if mass_in and mass_out:
@@ -106,7 +106,7 @@ def main():
         else "Предварительный расчёт: сходимость и балансы ещё не подтверждены."
     )
     lines = [
-        f"# CFD: мангал, {fan_cfm(params):.3f} CFM, нагрев 4 кВт",
+        f"# CFD: мангал, {fan_m3_h(params):.3f} м³/ч, нагрев 4 кВт",
         "",
         status,
         "",
@@ -115,7 +115,7 @@ def main():
         "",
     ]
     for label, key, units in [
-        ("Расход", "exhaust_cfm", "CFM"),
+        ("Расход", "exhaust_m3_h", "м³/ч"),
         ("Мощность нагревателя", "heater_W", "Вт"),
         ("Средняя температура выхода", "outlet_mean_T_K", "K"),
         ("Среднее давление выхода", "outlet_mean_p_Pa", "Па"),

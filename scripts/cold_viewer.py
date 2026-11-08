@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from generate import grill, hood
-from model_parameters import fan_cfm
+from model_parameters import fan_m3_h
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -185,7 +185,7 @@ def main():
     write_bundle(data, out)
     max_speed = max(max(d["speed"]) for d in data.values() if d["speed"])
     metadata = {
-        "fan_cfm": fan_cfm(params),
+        "fan_m3_h": fan_m3_h(params),
         "iteration": int(latest),
         "heat_W": 0,
         "max_sampled_speed_m_s": max_speed,
@@ -209,7 +209,7 @@ def main():
         d["points"] = [float(f"{v:.7g}") for v in d["points"]]
         d["speed"] = [float(f"{v:.6g}") for v in d["speed"]]
     html = (ROOT / "scripts/cold_viewer_template.html").read_text()
-    html = html.replace("__FLOW_CFM__", f"{fan_cfm(params):.3f}").replace("__ITERATION__", latest)
+    html = html.replace("__FLOW_M3_H__", f"{fan_m3_h(params):.3f}").replace("__ITERATION__", latest)
     html = html.replace(
         "__MAX_SPEED__", f"{metadata['max_volume_speed_m_s']:.2f}".replace(".", ",")
     )

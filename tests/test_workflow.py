@@ -34,6 +34,14 @@ class WorkflowTests(unittest.TestCase):
         )
         self.assertFalse(any("source.zip" in str(c) for c in commands))
 
+    def test_native_solver_completion_with_mpi_finalisation(self):
+        from run_case import solver_finished
+
+        self.assertTrue(solver_finished("Time = 30\nEnd\n\nFinalising parallel run\n"))
+        self.assertTrue(solver_finished("Time = 30\nEnd\n"))
+        self.assertFalse(solver_finished("Time = 30\nSolving for U"))
+        self.assertFalse(solver_finished("FOAM FATAL\nEnd\n"))
+
     def test_invalid_options_rejected_before_start(self):
         for options in [
             ["all", "--resume", "--cold"],

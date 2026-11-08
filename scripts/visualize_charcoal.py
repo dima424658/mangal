@@ -7,6 +7,7 @@ import zipfile
 
 from charcoal_report import CASE, report
 from charcoal_viewer import build
+from model_parameters import canonical_parameters
 from parallel import preflight, tool
 from run_case import ROOT, case_lock, stage
 
@@ -16,7 +17,7 @@ def main():
         preflight(stage, CASE)
         current = json.loads((ROOT / "geometry/parameters.json").read_text())
         saved = json.loads((CASE / "geometry/parameters.json").read_text())
-        if current != saved:
+        if canonical_parameters(current) != canonical_parameters(saved):
             raise RuntimeError("Charcoal result does not match current model parameters")
         result = report()
         if not result["source_full_power_reached"]:

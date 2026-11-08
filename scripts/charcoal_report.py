@@ -5,7 +5,7 @@ import json
 import math
 import re
 
-from model_parameters import CFM_TO_M3_S, fan_cfm
+from model_parameters import M3_H_TO_M3_S, fan_m3_h
 from run_case import ROOT
 
 CASE = ROOT / "runs/charcoal"
@@ -41,10 +41,10 @@ def report(require_finished=True):
     if require_finished and not finished:
         raise RuntimeError("Charcoal solver has not finished")
     times = re.findall(r"^Time = (" + NUM + r")$", log, re.M)
-    solver_iteration = float(times[-1])
     from parallel import time_name
 
     iteration = float(time_name(CASE, "latest"))
+    solver_iteration = float(times[-1]) if times else iteration
     # Monitoring may extend beyond the last written fields after an intentional stop.
     snapshot_log = ""
     for candidate in [
@@ -59,9 +59,9 @@ def report(require_finished=True):
             break
     out_mass = row("outletMassFlow", iteration)[1]
     ambient_mass = row("ambientMassFlow", iteration)[1]
-    flow = row("outletVolumeFlow", iteration)[1] / CFM_TO_M3_S
-    if not math.isclose(flow, fan_cfm(params), rel_tol=1e-5):
-        raise RuntimeError(f"Incorrect outlet CFM: {flow}")
+    flow = row("outletVolumeFlow", iteration)[1] / M3_H_TO_M3_S
+    if not math.isclose(flow, fan_m3_h(params), rel_tol=1e-5):
+        raise RuntimeError(f"Incorrect outlet м³/ч: {flow}")
     ambient_T = params["environment"]["air_temperature_K"]
     q_out = 1005 * (row("outletThermalFlux", iteration)[1] - ambient_T * out_mass)
     q_ambient = 1005 * (row("ambientThermalFlux", iteration)[1] - ambient_T * ambient_mass)
@@ -73,7 +73,7 @@ def report(require_finished=True):
         "solver_last_iteration": solver_iteration,
         "solver_finished": finished,
         "simple_converged": "SIMPLE solution converged" in log,
-        "fan_cfm": flow,
+        "fan_m3_h": flow,
         "source_power_W": source,
         "source_full_power_reached": iteration >= model["heat_ramp_iterations"],
         "mass_imbalance_fraction": abs(out_mass + ambient_mass) / max(abs(out_mass), 1e-30),
@@ -113,7 +113,7 @@ def report(require_finished=True):
         if result["engineering_result_ready"]
         else "Предварительный несошедшийся проход. Для инженерных выводов недостаточен.",
         "",
-        f"Итерация: {iteration:g}; расход: {flow:.3f} CFM; заданный источник: {source:.1f} Вт.",
+        f"Итерация: {iteration:g}; расход: {flow:.3f} м³/ч; заданный источник: {source:.1f} Вт.",
         f"Температура на выходе (средняя по площади): {result['outlet_mean_T_C']:.2f} °C.",
         f"Массовый дисбаланс: {result['mass_imbalance_fraction']:.4%}.",
         f"Вынос явного тепла вытяжкой: {q_out:.1f} Вт; открытыми границами: {q_ambient:.1f} Вт.",

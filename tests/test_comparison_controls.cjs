@@ -1,0 +1,31 @@
+// Exercise the real comparison controller without a browser or GPU.
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const template=fs.readFileSync('scripts/comparison_viewer_template.html','utf8');
+const script=[...template.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
+const queue=[],noop=()=>{},elements={};
+for(const id of ['mode','section','opacity','scale','scaleText','scaleStart','scaleEnd','status','view','intake','grillFlow','holes','hood','grill','coal'])elements[id]={value:'',checked:true,textContent:''};
+Object.assign(elements.mode,{value:'temperature_C'});Object.assign(elements.section,{value:'front'});Object.assign(elements.opacity,{value:'.18'});Object.assign(elements.scale,{value:'150'});
+const buttons=['near','all','face','profile','above'].map(name=>({dataset:{camera:name}}));
+const pointData={points:[0,0,0,1,0,0,0,0,1],polys:[3,0,1,2],lines:[],speed:[0,.2,.4],temperature_C:[20,30,40]};
+const solid={...pointData,speed:[]};
+const data={};for(const key of ['front','side','horizontal','intake','grillFlow','holes'])data[key]=pointData;for(const key of ['grill','hood','coal'])data[key]=solid;
+let renders=0;
+const rw={addRenderer:noop,removeRenderer:noop,render:()=>renders++};
+const cameraFactory=()=>{const c={listeners:[],position:[],scale:1};const change=()=>c.listeners.forEach(fn=>fn());return Object.assign(c,{setParallelProjection:noop,setPosition:(...v)=>{c.position=v;change();},getPosition:()=>c.position,setFocalPoint:change,setViewUp:change,setParallelScale:v=>{c.scale=v;change();},onModified:fn=>c.listeners.push(fn)});};
+const actorFactory=()=>{const property={setLighting:noop,setLineWidth:noop,setColor:noop,setOpacity:v=>property.opacity=v};return{visible:true,setMapper(m){this.mapper=m;},getMapper(){return this.mapper;},getProperty:()=>property,setVisibility(v){this.visible=v;},getVisibility(){return this.visible;}};};
+const mapperFactory=()=>({setInputData:noop,setLookupTable:noop,setScalarModeToUsePointData:noop,setColorModeToMapScalars:noop,setScalarVisibility:noop,setScalarRange(...v){this.range=v;},getScalarRange(){return this.range;}});
+const pdFactory=()=>{const pointData={setScalars(v){this.scalars=v;},getScalars(){return this.scalars;}};return{getPoints:()=>({setData:noop}),getPolys:()=>({setData:noop}),getLines:()=>({setData:noop}),getPointData:()=>pointData,modified:noop};};
+const vtk={Rendering:{Misc:{vtkGenericRenderWindow:{newInstance:()=>({setContainer:noop,getRenderer:()=>({}),getRenderWindow:()=>rw,resize:()=>rw.render()})}},Core:{vtkCamera:{newInstance:cameraFactory},vtkRenderer:{newInstance:()=>({setViewport:noop,setActiveCamera(c){this.camera=c;},getActiveCamera(){return this.camera;},addActor:noop,resetCameraClippingRange:noop})},vtkActor:{newInstance:actorFactory},vtkMapper:{newInstance:mapperFactory},vtkColorTransferFunction:{newInstance:()=>({removeAllPoints:noop,addRGBPoint:noop})}}},Common:{DataModel:{vtkPolyData:{newInstance:pdFactory}},Core:{vtkDataArray:{newInstance:v=>({...v,setData(data){this.values=data;}})}}}};
+const window={vtk};const context={window,vtk,variants:Array.from({length:4},()=>({data})),document:{getElementById:id=>elements[id],querySelectorAll:()=>buttons},requestAnimationFrame:fn=>queue.push(fn),ResizeObserver:class{observe(){}},console};
+vm.runInNewContext(script,context);
+function flush(){let count=0;while(queue.length){assert.ok(count++<20,'render scheduling loop');queue.shift()();}}
+flush();assert.ok(window.clearDraftComparison,elements.status.textContent);
+const board=window.clearDraftComparison;assert.equal(board.views.length,4);assert.ok(board.views.every(v=>v.renderer.getActiveCamera()===board.camera));
+elements.section.value='side';elements.section.onchange();flush();assert.ok(board.views.every(v=>v.actors.side.visible&&!v.actors.front.visible));
+elements.mode.value='speed';elements.mode.onchange({target:elements.mode});flush();assert.ok(board.views.every(v=>v.actors.side.mapper.range[1]===.6));
+elements.holes.checked=false;elements.holes.onchange();flush();assert.ok(board.views.every(v=>!v.actors.holes.visible));
+elements.opacity.value='.7';elements.opacity.oninput();flush();assert.ok(board.views.every(v=>v.actors.hood.getProperty().opacity===.7));
+buttons.find(b=>b.dataset.camera==='face').onclick();flush();assert.equal(JSON.stringify(board.camera.position),'[0,-6,0.7]');
+board.camera.setPosition(2,3,4);flush();assert.ok(board.views.every(v=>JSON.stringify(v.renderer.getActiveCamera().position)==='[2,3,4]'));
+assert.ok(renders>5);assert.equal(elements.status.textContent.startsWith('Готово 4 из 4'),true);
+console.log('PASS: shared camera, four viewports, common sections, field/scale, opacity, line groups, presets and render scheduling.');

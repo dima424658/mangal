@@ -1,18 +1,44 @@
-"""Canonical fan flow in CFM; OpenFOAM conversion uses exact international foot."""
+"""Canonical fan flow in m³/h, with legacy CFM input support."""
+
+import copy
 
 CFM_TO_M3_S = 0.028316846592 / 60
+M3_H_TO_M3_S = 1 / 3600
 
 
-def fan_cfm(p):
+def fan_m3_h(p):
     physics = p["physics"]
-    if "exhaust_cfm" in physics:
-        return float(physics["exhaust_cfm"])
-    # Read archived cases created before the switch to CFM.
-    return float(physics["exhaust_m3_h"]) / 3600 / CFM_TO_M3_S
+    if "exhaust_m3_h" in physics:
+        return float(physics["exhaust_m3_h"])
+    return float(physics["exhaust_cfm"]) * CFM_TO_M3_S * 3600
 
 
 def fan_m3_s(p):
-    return fan_cfm(p) * CFM_TO_M3_S
+    return fan_m3_h(p) / 3600
+
+
+def fan_cfm(p):
+    return fan_m3_s(p) / CFM_TO_M3_S
+
+
+def canonical_parameters(p):
+    result = copy.deepcopy(p)
+    flow = round(fan_m3_h(p), 9)
+    result["physics"].pop("exhaust_cfm", None)
+    result["physics"]["exhaust_m3_h"] = flow
+    result.setdefault("fan", {}).pop("flow_cfm", None)
+    result["fan"]["flow_m3_h"] = flow
+    return result
+
+
+def outlet_height(p):
+    return (
+        p["hood"]["top_z"]
+        + p["assumptions"]["square_to_round_length_m"]
+        + p["duct"]["first_length"]
+        + p["assumptions"]["reducer_length_m"]
+        + p["duct"]["second_length"]
+    )
 
 
 def mesh_signature(p):

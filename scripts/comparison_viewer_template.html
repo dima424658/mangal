@@ -1,0 +1,73 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearDraft · сравнение вытяжек</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101822;color:#edf3fa;font:14px system-ui,sans-serif}aside{position:fixed;inset:0 auto 0 0;width:290px;padding:18px;background:#142131;overflow:auto}h1{font-size:20px;margin:0 0 12px}label{display:block;margin:10px 0}select,button{background:#26445c;color:white;border:1px solid #6285a2;border-radius:5px;padding:6px;cursor:pointer}button{margin:3px}input[type=range]{width:100%}small{display:block;color:#b9cadd;line-height:1.4}p{line-height:1.4}#stage{position:fixed;inset:0 0 0 290px}#view{position:absolute;inset:0}.title{position:absolute;padding:10px 14px;background:#101822bb;pointer-events:none;z-index:1}.title a{pointer-events:auto;color:#edf3fa;text-decoration:none;font-weight:650}.title small{margin-top:3px}.title-0{top:0;left:0}.title-1{top:0;left:50%}.title-2{top:50%;left:0}.title-3{top:50%;left:50%}.divider{position:absolute;pointer-events:none;background:#728ba0;z-index:1}.vertical{left:50%;top:0;bottom:0;width:1px}.horizontal{top:50%;left:0;right:0;height:1px}.bar{height:12px;background:linear-gradient(90deg,#164db3,#10bfd1,#55ce74,#efc63e,#f04a2e);margin-top:12px}.ends{display:flex;justify-content:space-between}a{color:#9cd6ff}#status{border-top:1px solid #40556b;padding-top:12px}@media(max-width:750px){aside{width:100%;height:290px;bottom:auto}#stage{inset:290px 0 0}.title{font-size:12px;padding:6px}.title small{font-size:10px}}
+</style>
+<aside><h1>ClearDraft<br>Сравнение 4 вариантов</h1>
+<small>Одна камера и общие настройки для всех окон. Вращайте и масштабируйте любое окно — остальные следуют за ним.</small>
+<label>Поле <select id="mode"><option value="temperature_C">Температура, °C</option><option value="speed">Скорость, м/с</option></select></label>
+<label>Сечение <select id="section"><option value="front">X–Z · Y = −0,05 м</option><option value="side">Y–Z · X = −0,275 м</option><option value="horizontal">X–Y · Z = 0,35 м</option><option value="all">Все три сечения</option><option value="none">Без сечений</option></select></label>
+<label><input type="checkbox" id="intake" checked> Вход вытяжки · 72 линии</label>
+<label><input type="checkbox" id="grillFlow" checked> Мангал и шампуры · 80 линий</label>
+<label><input type="checkbox" id="holes" checked> Отверстия · 56 линий</label>
+<label><input type="checkbox" id="hood" checked> Стенки вытяжки</label>
+<label><input type="checkbox" id="grill" checked> Мангал и шампуры</label>
+<label><input type="checkbox" id="coal" checked> Угли</label>
+<label>Непрозрачность стенок <input id="opacity" type="range" min="0" max="1" step="0.02" value="0.18"></label>
+<label>Верх шкалы <b id="scaleText">150 °C</b><input id="scale" type="range" min="30" max="2200" step="10" value="150"></label>
+<div class="bar"></div><div class="ends"><small id="scaleStart">20 °C</small><small id="scaleEnd">150 °C</small></div>
+<p><button data-camera="near">Зона мангала</button><button data-camera="all">Вся сборка</button><button data-camera="face">Спереди</button><button data-camera="profile">Сбоку</button><button data-camera="above">Сверху</button></p>
+<small>Мышь: вращение · колесо: масштаб · Shift + мышь: перемещение. Сечения находятся в одинаковых мировых координатах. Показана температура газа, не мяса или углей.</small>
+<p id="status">Загрузка VTK.js…</p><small>Предварительные поля: строгая сходимость и доля захвата дыма не установлены. <a href="REPORT.md">Численные результаты</a>.</small>
+</aside><main id="stage"><div id="view"></div>__TITLES__<div class="divider vertical"></div><div class="divider horizontal"></div></main>
+<script type="application/json" id="comparison-data">__VARIANTS_JSON__</script>
+<script>const dataNode=document.getElementById("comparison-data");const variants=JSON.parse(dataNode.textContent);dataNode.textContent="";dataNode.remove();</script>
+<script src="https://unpkg.com/vtk.js" onerror="document.getElementById('status').textContent='VTK.js не загрузился. Нужен доступ к CDN; OBJ и ParaView доступны в папках вариантов.'"></script>
+<script>
+(function(){if(!window.vtk)return;try{
+const generic=vtk.Rendering.Misc.vtkGenericRenderWindow.newInstance({background:[.055,.085,.12],listenWindowResize:true});
+generic.setContainer(document.getElementById('view'));
+const rw=generic.getRenderWindow();rw.removeRenderer(generic.getRenderer());
+const camera=vtk.Rendering.Core.vtkCamera.newInstance();camera.setParallelProjection(true);
+const lut=vtk.Rendering.Core.vtkColorTransferFunction.newInstance(),views=[],mappers=[],colored=[];
+const viewports=[[0,.5,.5,1],[.5,.5,1,1],[0,0,.5,.5],[.5,0,1,.5]];
+const bounds=[Infinity,-Infinity,Infinity,-Infinity,Infinity,-Infinity];
+let mode='temperature_C',scheduled=false,painting=false;
+function requestRender(){if(scheduled||painting)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;painting=true;try{if(Number.isFinite(bounds[0]))views[0].renderer.resetCameraClippingRange(bounds);rw.render();}finally{painting=false;}});}
+for(let index=0;index<variants.length;index++){
+ const renderer=vtk.Rendering.Core.vtkRenderer.newInstance({background:[.055,.085,.12]});renderer.setViewport(...viewports[index]);renderer.setActiveCamera(camera);rw.addRenderer(renderer);
+ const actors={};views.push({renderer,actors});const data=variants[index].data;if(!data)continue;
+ for(const[key,d]of Object.entries(data)){
+  const pd=vtk.Common.DataModel.vtkPolyData.newInstance();pd.getPoints().setData(new Float32Array(d.points),3);
+  if(d.polys.length)pd.getPolys().setData(new Uint32Array(d.polys));if(d.lines.length)pd.getLines().setData(new Uint32Array(d.lines));
+  for(let i=0;i<d.points.length;i+=3)for(let axis=0;axis<3;axis++){bounds[axis*2]=Math.min(bounds[axis*2],d.points[i+axis]);bounds[axis*2+1]=Math.max(bounds[axis*2+1],d.points[i+axis]);}
+  const mapper=vtk.Rendering.Core.vtkMapper.newInstance();mapper.setInputData(pd);const actor=vtk.Rendering.Core.vtkActor.newInstance();actor.setMapper(mapper);
+  if(d.speed.length){
+   pd.getPointData().setScalars(vtk.Common.Core.vtkDataArray.newInstance({name:'colorValue',numberOfComponents:1,values:new Float32Array(d[mode])}));
+   mapper.setLookupTable(lut);mapper.setScalarModeToUsePointData();mapper.setColorModeToMapScalars();mapper.setScalarVisibility(true);actor.getProperty().setLighting(false);actor.getProperty().setLineWidth(key==='holes'?1.5:2);mappers.push(mapper);colored.push({pd,data:d});
+  }else{mapper.setScalarVisibility(false);actor.getProperty().setColor(...(key==='coal'?[.055,.05,.045]:key==='grill'?[.56,.61,.66]:[.60,.70,.78]));}
+  actors[key]=actor;renderer.addActor(actor);
+ }
+}
+function applyVisibility(){const section=document.getElementById('section').value,opacity=+document.getElementById('opacity').value;
+ for(const{actors}of views){
+  for(const key of ['front','side','horizontal'])if(actors[key])actors[key].setVisibility(section===key||section==='all');
+  for(const key of ['intake','grillFlow','holes','hood','grill','coal'])if(actors[key])actors[key].setVisibility(document.getElementById(key).checked);
+  if(actors.hood)actors.hood.getProperty().setOpacity(opacity);if(actors.grill)actors.grill.getProperty().setOpacity(Math.min(1,opacity+.3));
+ }requestRender();}
+function applyScale(){const high=+document.getElementById('scale').value,low=mode==='temperature_C'?20:0,unit=mode==='temperature_C'?'°C':'м/с';lut.removeAllPoints();
+ [[0,.086,.302,.70],[.22,.06,.75,.82],[.48,.33,.81,.45],[.74,.94,.78,.24],[1,.94,.29,.18]].forEach(c=>lut.addRGBPoint(low+c[0]*(high-low),c[1],c[2],c[3]));
+ for(const mapper of mappers)mapper.setScalarRange(low,high);document.getElementById('scaleText').textContent=high+' '+unit;document.getElementById('scaleStart').textContent=low+' '+unit;document.getElementById('scaleEnd').textContent=high+' '+unit;requestRender();}
+const presets={near:[[3,-5,3.3],[-.15,-.02,.6],1,[0,0,1]],all:[[4,-7,3.5],[0,0,1.65],1.95,[0,0,1]],face:[[0,-6,.7],[0,0,.7],1.05,[0,0,1]],profile:[[5,0,.7],[0,0,.7],1.05,[0,0,1]],above:[[0,0,6],[0,0,.5],1.05,[0,1,0]]};
+function preset(name){const[p,f,s,u]=presets[name];camera.setPosition(...p);camera.setFocalPoint(...f);camera.setViewUp(...u);camera.setParallelScale(s);requestRender();}
+for(const key of ['section','intake','grillFlow','holes','hood','grill','coal'])document.getElementById(key).onchange=applyVisibility;
+document.getElementById('opacity').oninput=applyVisibility;document.getElementById('scale').oninput=applyScale;
+document.getElementById('mode').onchange=e=>{mode=e.target.value;for(const item of colored){item.pd.getPointData().getScalars().setData(new Float32Array(item.data[mode]),1);item.pd.modified();}
+ const slider=document.getElementById('scale');slider.min=mode==='temperature_C'?30:.02;slider.max=mode==='temperature_C'?2200:10;slider.step=mode==='temperature_C'?10:.02;slider.value=mode==='temperature_C'?150:.6;applyScale();};
+for(const button of document.querySelectorAll('[data-camera]'))button.onclick=()=>preset(button.dataset.camera);
+camera.onModified(requestRender);new ResizeObserver(()=>generic.resize()).observe(document.getElementById('view'));
+applyVisibility();applyScale();preset('near');generic.resize();
+window.clearDraftComparison={camera,views,renderWindow:rw,preset};
+document.getElementById('status').textContent='Готово '+variants.filter(v=>v.data).length+' из 4. Камера синхронизирована; настройки применяются ко всем вариантам.';
+}catch(error){document.getElementById('status').textContent='Ошибка 3D: '+error.message;console.error(error);}})();
+</script></html>

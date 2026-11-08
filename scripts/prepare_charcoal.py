@@ -9,9 +9,9 @@ from contextlib import ExitStack
 
 from charcoal import bed_bounds, ergun
 from generate import header
-from model_parameters import fan_cfm, mesh_revision, mesh_signature
+from model_parameters import canonical_parameters, fan_m3_h, mesh_revision, mesh_signature
 from parallel import preflight, tool
-from run_case import ROOT, case_lock, current_mesh, stage
+from run_case import ROOT, case_lock, current_mesh, solver_finished, stage
 
 CASE = ROOT / "runs/charcoal"
 
@@ -41,9 +41,9 @@ def prepare():
         log = (cold / "logs/simpleFoam.log").read_text()
         ready = (
             mesh_signature(saved) == mesh_signature(p)
-            and math.isclose(fan_cfm(saved), fan_cfm(p), rel_tol=1e-10)
+            and math.isclose(fan_m3_h(saved), fan_m3_h(p), rel_tol=1e-10)
             and revision == mesh_revision(ROOT)
-            and log.rstrip().endswith("End")
+            and solver_finished(log)
             and "FOAM FATAL" not in log
         )
     except (FileNotFoundError, ValueError):
@@ -187,7 +187,7 @@ charcoalResistance
 """
     )
     report = {
-        "fan_cfm": fan_cfm(p),
+        "fan_m3_h": fan_m3_h(p),
         "cold_seed": str(latest.relative_to(ROOT)),
         "bed_bounds_m": [low, high],
         "heat_release_bounds_m": [heat_low, heat_high],
@@ -217,7 +217,7 @@ def run(iterations=120, resume=False):
     if resume:
         p = json.loads((ROOT / "geometry/parameters.json").read_text())
         saved = json.loads((CASE / "geometry/parameters.json").read_text())
-        if p != saved:
+        if canonical_parameters(p) != canonical_parameters(saved):
             raise RuntimeError(
                 "Parameters changed; prepare a new charcoal case instead of resuming"
             )

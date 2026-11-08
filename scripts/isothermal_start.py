@@ -7,7 +7,7 @@ import shutil
 from contextlib import nullcontext
 
 from generate import header
-from model_parameters import fan_cfm, fan_m3_s, mesh_revision
+from model_parameters import fan_m3_h, fan_m3_s, mesh_revision
 from parallel import preflight, tool
 from run_case import ROOT, case_lock, stage
 
@@ -36,7 +36,7 @@ def main(already_locked=False, iterations=30):
             u,
         )
         u_path.write_text(u)
-        print(f"Cold-flow target: {fan_cfm(params):.3f} CFM; heating disabled.", flush=True)
+        print(f"Cold-flow target: {fan_m3_h(params):.3f} м³/ч; heating disabled.", flush=True)
         (case / "constant").mkdir()
         shutil.copy2(ROOT / "constant/turbulenceProperties", case / "constant/turbulenceProperties")
         shutil.copytree(

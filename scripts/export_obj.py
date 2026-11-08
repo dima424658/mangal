@@ -9,7 +9,7 @@ from pathlib import Path
 
 from charcoal import bed_bounds, lumps
 from generate import grill, hood
-from model_parameters import fan_cfm, mesh_signature
+from model_parameters import fan_m3_h, mesh_signature
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,7 +40,7 @@ def main():
     report = {
         "parameters_sha256": hashlib.sha256(params.read_bytes()).hexdigest(),
         "units": "m",
-        "exhaust_cfm": fan_cfm(p),
+        "exhaust_m3_h": fan_m3_h(p),
         "objects": {},
     }
     with (out / "mangal.obj").open("w") as obj:
@@ -101,7 +101,7 @@ def main():
             report["fan"] = {
                 "position_m": [0, 0, outlet_z],
                 "diameter_m": 2 * radius,
-                "flow_cfm": fan_cfm(p),
+                "flow_m3_h": fan_m3_h(p),
                 "representation": "symbolic open disk, not a solid CFD wall",
             }
     back_y = report["objects"]["Grill"]["bounds_m"][1][1]

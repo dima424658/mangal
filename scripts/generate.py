@@ -7,7 +7,7 @@ import json
 import math
 from pathlib import Path
 
-from model_parameters import fan_m3_s
+from model_parameters import fan_m3_s, outlet_height
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -317,9 +317,9 @@ def main():
     assert g["front_holes"] == g["back_holes"] == len(g["hole_centers_x_assumed"]) == 4, (
         "Four holes per side required"
     )
-    assert p["environment"]["domain_bounds_m"] == [-2, 2, -2, 2, 0, 3.46], (
-        "Adapt generator for a different domain"
-    )
+    assert p["environment"]["domain_bounds_m"][:5] == [-2, 2, -2, 2, 0] and math.isclose(
+        p["environment"]["domain_bounds_m"][5], outlet_height(p)
+    ), "Adapt generator for a different domain"
     assert p["environment"]["wind_m_s"] == 0, "Wind boundary conditions are not implemented"
     assert (
         0
@@ -418,8 +418,8 @@ geometry
  grill.stl {{ type triSurfaceMesh; name grill; regions {{ grillWalls {{ name grillWalls; }} heater {{ name heater; }} }} }}
  skewers.stl {{ type triSurfaceMesh; name skewers; regions {{ meatWalls {{ name meatWalls; }} skewerWalls {{ name skewerWalls; }} }} }}
  hood.stl {{ type triSurfaceMesh; name hood; regions {{ hoodWalls {{ name hoodWalls; }} }} }}
- plume {{ type searchableBox; min ({g.get("offset_x_m", 0) - g["width"] / 2 - 0.075} {g.get("offset_y_m", 0) - g["depth"] / 2 - 0.075} 0.02); max ({g.get("offset_x_m", 0) + g["width"] / 2 + 0.075} {g.get("offset_y_m", 0) + g["depth"] / 2 + 0.075} 1.2); }}
- duct {{ type searchableBox; min (-0.18 -0.18 1.15); max (0.18 0.18 {top}); }}
+ plume {{ type searchableBox; min ({g.get("offset_x_m", 0) - g["width"] / 2 - 0.075} {g.get("offset_y_m", 0) - g["depth"] / 2 - 0.075} 0.02); max ({g.get("offset_x_m", 0) + g["width"] / 2 + 0.075} {g.get("offset_y_m", 0) + g["depth"] / 2 + 0.075} {p["hood"]["top_z"] + 0.04}); }}
+ duct {{ type searchableBox; min (-0.18 -0.18 {p["hood"]["top_z"] - 0.01}); max (0.18 0.18 {top}); }}
  bed {{ type searchableBox; min ({g.get("offset_x_m", 0) - g["width"] / 2} {g.get("offset_y_m", 0) - g["depth"] / 2} 0.005); max ({g.get("offset_x_m", 0) + g["width"] / 2} {g.get("offset_y_m", 0) + g["depth"] / 2} 0.10); }}
  {" ".join(hole_boxes)}
 }}

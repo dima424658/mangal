@@ -14,9 +14,14 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
-from model_parameters import fan_cfm, fan_m3_s, mesh_signature
+from model_parameters import fan_m3_h, fan_m3_s, mesh_signature
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def solver_finished(log):
+    """MPI adds a finalisation line after End; both serial and MPI endings count."""
+    return bool(re.search(r"^End\s*$", log, re.M)) and "FOAM FATAL" not in log
 
 
 @contextmanager
@@ -355,7 +360,7 @@ def main():
                     history.mkdir(parents=True, exist_ok=True)
                     shutil.move(str(previous), str(history / f"postProcessing-{time.time_ns()}"))
                 print(
-                    f"Fan target: {fan_cfm(json.loads((ROOT / 'geometry/parameters.json').read_text())):.3f} CFM",
+                    f"Fan target: {fan_m3_h(json.loads((ROOT / 'geometry/parameters.json').read_text())):.3f} м³/ч",
                     flush=True,
                 )
                 from parallel import tool
